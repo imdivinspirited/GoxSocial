@@ -73,6 +73,10 @@ export class MemStorage implements IStorage {
     this.comments = new Map();
     this.bookings = new Map();
     
+    // Debug current database state
+    console.log('Database initialized with:');
+    console.log('Users:', Array.from(this.users.values()));
+    
     this.userIdCounter = 1;
     this.destinationIdCounter = 1;
     this.experienceIdCounter = 1;
