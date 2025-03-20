@@ -201,6 +201,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint - only available in development
+  if (process.env.NODE_ENV !== 'production') {
+    app.get('/api/debug/db', (req, res) => {
+      const dbState = {
+        users: Array.from(storage.users.values()),
+        destinations: Array.from(storage.destinations.values()),
+        experiences: Array.from(storage.experiences.values()),
+        posts: Array.from(storage.posts.values()),
+        comments: Array.from(storage.comments.values()),
+        bookings: Array.from(storage.bookings.values())
+      };
+      res.json(dbState);
+    });
+  }
+
   const httpServer = createServer(app);
   return httpServer;
 }
