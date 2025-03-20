@@ -1,5 +1,8 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as FacebookStrategy } from "passport-facebook";
+import { Strategy as TwitterStrategy } from "passport-twitter";
 import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
@@ -48,6 +51,77 @@ export function setupAuth(app: Express) {
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
+
+  // Google Strategy
+  passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID || '',
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    callbackURL: "/auth/google/callback"
+  }, async (accessToken, refreshToken, profile, done) => {
+    try {
+      let user = await storage.getUserByUsername(profile.emails![0].value);
+      if (!user) {
+        user = await storage.createUser({
+          username: profile.emails![0].value,
+          email: profile.emails![0].value,
+          password: '', // Social login doesn't need password
+          fullName: profile.displayName,
+          profileImage: profile.photos?.[0].value
+        });
+      }
+      return done(null, user);
+    } catch (error) {
+      return done(error as Error);
+    }
+  }));
+
+  // Facebook Strategy
+  passport.use(new FacebookStrategy({
+    clientID: process.env.FACEBOOK_APP_ID || '',
+    clientSecret: process.env.FACEBOOK_APP_SECRET || '',
+    callbackURL: "/auth/facebook/callback",
+    profileFields: ['id', 'displayName', 'photos', 'email']
+  }, async (accessToken, refreshToken, profile, done) => {
+    try {
+      let user = await storage.getUserByUsername(profile.emails![0].value);
+      if (!user) {
+        user = await storage.createUser({
+          username: profile.emails![0].value,
+          email: profile.emails![0].value,
+          password: '',
+          fullName: profile.displayName,
+          profileImage: profile.photos?.[0].value
+        });
+      }
+      return done(null, user);
+    } catch (error) {
+      return done(error as Error);
+    }
+  }));
+
+  // Twitter Strategy
+  passport.use(new TwitterStrategy({
+    consumerKey: process.env.TWITTER_API_KEY || '',
+    consumerSecret: process.env.TWITTER_API_SECRET || '',
+    callbackURL: "/auth/twitter/callback",
+    includeEmail: true
+  }, async (token, tokenSecret, profile, done) => {
+    try {
+      let user = await storage.getUserByUsername(profile.emails![0].value);
+      if (!user) {
+        user = await storage.createUser({
+          username: profile.emails![0].value,
+          email: profile.emails![0].value,
+          password: '',
+          fullName: profile.displayName,
+          profileImage: profile.photos?.[0].value
+        });
+      }
+      return done(null, user);
+    } catch (error) {
+      return done(error as Error);
+    }
+  }));
 
   passport.use(
     new LocalStrategy(async (username, password, done) => {
@@ -128,6 +202,27 @@ export function setupAuth(app: Express) {
       });
     })(req, res, next);
   });
+
+  // Google auth routes
+  app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+  app.get('/auth/google/callback', passport.authenticate('google', {
+    successRedirect: '/',
+    failureRedirect: '/auth'
+  }));
+
+  // Facebook auth routes
+  app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+  app.get('/auth/facebook/callback', passport.authenticate('facebook', {
+    successRedirect: '/',
+    failureRedirect: '/auth'
+  }));
+
+  // Twitter auth routes
+  app.get('/auth/twitter', passport.authenticate('twitter'));
+  app.get('/auth/twitter/callback', passport.authenticate('twitter', {
+    successRedirect: '/',
+    failureRedirect: '/auth'
+  }));
 
   app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
