@@ -102,10 +102,15 @@ export default function AuthPage() {
               <div className="space-y-4">
                 <Button
                   variant="outline"
-                  className="w-full"
-                  onClick={() => window.location.href = '/auth/google'}
+                  className="w-full flex items-center justify-center gap-2 border-2"
+                  onClick={() => window.location.href = '/api/auth/google'}
                 >
-                  Continue with Google
+                  <img 
+                    src="https://www.google.com/favicon.ico"
+                    alt="Google"
+                    className="w-4 h-4"
+                  />
+                  Sign in with Google
                 </Button>
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">

@@ -52,7 +52,48 @@ export function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Google Strategy temporarily removed
+  // Google OAuth Strategy
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: process.env.GOOGLE_CLIENT_ID!,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        callbackURL: process.env.GOOGLE_CALLBACK_URL,
+        scope: ["profile", "email"],
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          let user = await storage.getUserByUsername(profile.emails![0].value);
+          
+          if (!user) {
+            // Create new user if doesn't exist
+            user = await storage.createUser({
+              username: profile.emails![0].value,
+              email: profile.emails![0].value,
+              password: randomBytes(32).toString("hex"), // Random password for OAuth users
+              name: profile.displayName,
+              profilePicture: profile.photos?.[0].value,
+            });
+          }
+          
+          return done(null, user);
+        } catch (error) {
+          return done(error as Error);
+        }
+      },
+    ),
+  );
+
+  // Google auth routes
+  app.get("/api/auth/google", passport.authenticate("google"));
+  
+  app.get(
+    "/api/auth/google/callback",
+    passport.authenticate("google", {
+      successRedirect: "/",
+      failureRedirect: "/auth",
+    }),
+  );
 
 
   passport.use(
