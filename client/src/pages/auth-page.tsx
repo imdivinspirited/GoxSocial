@@ -41,7 +41,7 @@ export default function AuthPage() {
   if (user) {
     return <Redirect to="/" />;
   }
-  
+
   // Login form
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -96,9 +96,33 @@ export default function AuthPage() {
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="register">Register</TabsTrigger>
             </TabsList>
-            
+
             {/* Login Tab */}
-            <TabsContent value="login" className="space-y-6">
+            <TabsContent value="login" className="space-y-4">
+              <div className="space-y-4">
+                <Button
+                  variant="outline"
+                  className="w-full flex items-center justify-center gap-2 border-2"
+                  onClick={() => window.location.href = '/api/auth/google'}
+                >
+                  <img 
+                    src="https://www.google.com/favicon.ico"
+                    alt="Google"
+                    className="w-4 h-4"
+                  />
+                  Sign in with Google
+                </Button>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Or continue with
+                    </span>
+                  </div>
+                </div>
+              </div>
               <Form {...loginForm}>
                 <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                   <FormField
@@ -136,14 +160,14 @@ export default function AuthPage() {
                   </Button>
                 </form>
               </Form>
-              
+
               <div className="text-center">
                 <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   Don't have an account? <a href="#" className="text-primary font-medium">Register now</a>
                 </p>
               </div>
             </TabsContent>
-            
+
             {/* Register Tab */}
             <TabsContent value="register" className="space-y-6">
               <Form {...registerForm}>
@@ -222,7 +246,7 @@ export default function AuthPage() {
                   </Button>
                 </form>
               </Form>
-              
+
               <div className="text-center">
                 <p className="text-sm text-neutral-600 dark:text-neutral-400">
                   Already have an account? <a href="#" className="text-primary font-medium">Login</a>
@@ -232,7 +256,7 @@ export default function AuthPage() {
           </Tabs>
         </div>
       </div>
-      
+
       {/* Right column - Hero Image (visible on larger screens) */}
       <div className="hidden lg:block lg:w-1/2 bg-primary relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-primary-light/80"></div>

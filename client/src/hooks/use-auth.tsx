@@ -61,12 +61,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await res.json();
     },
     onSuccess: (user: User) => {
-      queryClient.setQueryData(["/api/user"], user);
       toast({
         title: "Account created!",
-        description: `Welcome to TourviaHPT, ${user.username}!`,
+        description: "Please login with your credentials",
       });
-      setLocation("/");
+      setLocation("/auth");
     },
     onError: (error: Error) => {
       toast({

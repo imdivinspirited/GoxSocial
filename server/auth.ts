@@ -1,5 +1,8 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as FacebookStrategy } from "passport-facebook";
+//import { Strategy as TwitterStrategy } from "passport-twitter"; //Removed Twitter Strategy import
 import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
@@ -22,10 +25,15 @@ async function hashPassword(password: string) {
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
+  try {
+    const [hashed, salt] = stored.split(".");
+    const hashedBuf = Buffer.from(hashed, "hex");
+    const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+    return timingSafeEqual(hashedBuf, suppliedBuf);
+  } catch (error) {
+    console.error("Password comparison error:", error);
+    return false;
+  }
 }
 
 export function setupAuth(app: Express) {
@@ -43,6 +51,52 @@ export function setupAuth(app: Express) {
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
+
+  // Google OAuth Strategy (only if credentials are configured)
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(
+      new GoogleStrategy(
+        {
+          clientID: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          callbackURL: process.env.GOOGLE_CALLBACK_URL,
+          scope: ["profile", "email"],
+        },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          let user = await storage.getUserByUsername(profile.emails![0].value);
+          
+          if (!user) {
+            // Create new user if doesn't exist
+            user = await storage.createUser({
+              username: profile.emails![0].value,
+              email: profile.emails![0].value,
+              password: randomBytes(32).toString("hex"), // Random password for OAuth users
+              name: profile.displayName,
+              profilePicture: profile.photos?.[0].value,
+            });
+          }
+          
+          return done(null, user);
+        } catch (error) {
+          return done(error as Error);
+        }
+      },
+    ),
+    );
+
+    // Google auth routes only if OAuth is configured
+  app.get("/api/auth/google", passport.authenticate("google"));
+    
+    app.get(
+      "/api/auth/google/callback",
+      passport.authenticate("google", {
+        successRedirect: "/",
+        failureRedirect: "/auth",
+      }),
+    );
+  }
+
 
   passport.use(
     new LocalStrategy(async (username, password, done) => {
@@ -89,30 +143,43 @@ export function setupAuth(app: Express) {
 
       // Safely remove password from response
       const { password, ...safeUser } = user;
-
-      req.login(user, (err) => {
-        if (err) return next(err);
-        res.status(201).json(safeUser);
-      });
+      res.status(201).json(safeUser);
     } catch (error) {
       next(error);
     }
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
-      if (err) return next(err);
-      if (!user) return res.status(401).json({ message: "Invalid credentials" });
-      
+    console.log("Login attempt:", { username: req.body.username });
+
+    passport.authenticate("local", async (err, user, info) => {
+      if (err) {
+        console.error("Login error:", err);
+        return next(err);
+      }
+
+      if (!user) {
+        const dbUser = await storage.getUserByUsername(req.body.username);
+        console.log("DB User found:", !!dbUser, "Password match failed");
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
       req.login(user, (err) => {
-        if (err) return next(err);
-        
+        if (err) {
+          console.error("Session error:", err);
+          return next(err);
+        }
+
         // Safely remove password from response
         const { password, ...safeUser } = user;
+        console.log("Login successful for user:", safeUser.username);
         res.status(200).json(safeUser);
       });
     })(req, res, next);
   });
+
+  // Google auth routes temporarily removed
+
 
   app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
@@ -123,7 +190,7 @@ export function setupAuth(app: Express) {
 
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+
     // Safely remove password from response
     const { password, ...safeUser } = req.user as User;
     res.json(safeUser);
