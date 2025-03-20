@@ -47,7 +47,7 @@ export function SocialFeed() {
   return (
     <section className="mb-10">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Travel Posts</h2>
+        <h2 className="text-xl font-semibold heading-primary">Travel Posts</h2>
       </div>
       
       {/* Create Post */}

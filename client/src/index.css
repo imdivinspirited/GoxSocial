@@ -12,6 +12,17 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold text-primary-foreground;
+    @apply font-bold text-neutral-900 dark:text-white;
+  }
+
+  .text-primary {
+    color: #0984E3 !important;
+  }
+
+  h1.text-primary, 
+  h2.text-primary, 
+  h3.text-primary,
+  .heading-primary {
+    @apply text-[#0984E3] dark:text-[#0984E3];
   }
 }
