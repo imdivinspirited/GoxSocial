@@ -52,15 +52,16 @@ export function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Google OAuth Strategy
-  passport.use(
-    new GoogleStrategy(
-      {
-        clientID: process.env.GOOGLE_CLIENT_ID!,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL,
-        scope: ["profile", "email"],
-      },
+  // Google OAuth Strategy (only if credentials are configured)
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(
+      new GoogleStrategy(
+        {
+          clientID: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          callbackURL: process.env.GOOGLE_CALLBACK_URL,
+          scope: ["profile", "email"],
+        },
       async (accessToken, refreshToken, profile, done) => {
         try {
           let user = await storage.getUserByUsername(profile.emails![0].value);
@@ -82,18 +83,19 @@ export function setupAuth(app: Express) {
         }
       },
     ),
-  );
+    );
 
-  // Google auth routes
+    // Google auth routes only if OAuth is configured
   app.get("/api/auth/google", passport.authenticate("google"));
-  
-  app.get(
-    "/api/auth/google/callback",
-    passport.authenticate("google", {
-      successRedirect: "/",
-      failureRedirect: "/auth",
-    }),
-  );
+    
+    app.get(
+      "/api/auth/google/callback",
+      passport.authenticate("google", {
+        successRedirect: "/",
+        failureRedirect: "/auth",
+      }),
+    );
+  }
 
 
   passport.use(
