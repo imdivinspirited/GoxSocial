@@ -94,11 +94,7 @@ export function setupAuth(app: Express) {
 
       // Safely remove password from response
       const { password, ...safeUser } = user;
-
-      req.login(user, (err) => {
-        if (err) return next(err);
-        res.status(201).json(safeUser);
-      });
+      res.status(201).json(safeUser);
     } catch (error) {
       next(error);
     }
