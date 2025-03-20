@@ -107,13 +107,7 @@ export default function AuthPage() {
                 >
                   Continue with Google
                 </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => window.location.href = '/auth/facebook'}
-                >
-                  Continue with Facebook
-                </Button>
+                
                 <Button
                   variant="outline"
                   className="w-full"
