@@ -10,7 +10,7 @@ export function TrendingExperiences() {
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Trending Experiences</h2>
+        <h2 className="text-xl font-semibold heading-primary">Trending Experiences</h2>
         <a href="#" className="text-primary text-sm font-medium">View All</a>
       </div>
       

@@ -11,7 +11,7 @@ export function FeaturedDestinations() {
   return (
     <section className="mb-10">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Featured Destinations</h2>
+        <h2 className="text-xl font-semibold heading-primary">Featured Destinations</h2>
         <a href="#" className="text-primary text-sm font-medium">View All</a>
       </div>
       
