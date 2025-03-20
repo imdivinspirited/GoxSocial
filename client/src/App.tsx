@@ -7,6 +7,7 @@ import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import ExplorePage from "@/pages/explore-page";
 import ProfilePage from "@/pages/profile-page";
+import SettingsPage from "@/pages/settings-page";
 import BookingPage from "@/pages/booking-page";
 import NotificationsPage from "@/pages/notifications-page";
 import { ProtectedRoute } from "./lib/protected-route";
@@ -19,6 +20,7 @@ function Router() {
       <ProtectedRoute path="/" component={HomePage} />
       <ProtectedRoute path="/explore" component={ExplorePage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
+      <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/bookings" component={BookingPage} />
       <ProtectedRoute path="/notifications" component={NotificationsPage} />
       <Route component={NotFound} />
