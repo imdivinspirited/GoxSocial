@@ -105,15 +105,29 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
-      if (err) return next(err);
-      if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    console.log("Login attempt:", { username: req.body.username });
+    
+    passport.authenticate("local", async (err, user, info) => {
+      if (err) {
+        console.error("Login error:", err);
+        return next(err);
+      }
+      
+      if (!user) {
+        const dbUser = await storage.getUserByUsername(req.body.username);
+        console.log("DB User found:", !!dbUser, "Password match failed");
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
       
       req.login(user, (err) => {
-        if (err) return next(err);
+        if (err) {
+          console.error("Session error:", err);
+          return next(err);
+        }
         
         // Safely remove password from response
         const { password, ...safeUser } = user;
+        console.log("Login successful for user:", safeUser.username);
         res.status(200).json(safeUser);
       });
     })(req, res, next);
