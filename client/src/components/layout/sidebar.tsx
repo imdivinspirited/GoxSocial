@@ -1,5 +1,4 @@
 import { useLocation } from "wouter";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { 
@@ -8,7 +7,8 @@ import {
   Briefcase, 
   User, 
   Bell, 
-  LogOut 
+  LogOut,
+  Settings
 } from "lucide-react";
 
 export function Sidebar() {
@@ -84,13 +84,20 @@ export function Sidebar() {
           <span>Notifications</span>
           <span className="absolute right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full">3</span>
         </a>
+        <a 
+          href="/settings" 
+          className={`flex items-center space-x-3 p-3 rounded-lg ${
+            isActive("/settings") 
+              ? "bg-primary text-white" 
+              : "hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+          }`}
+        >
+          <Settings className="w-5 h-5" />
+          <span>Settings</span>
+        </a>
       </nav>
       
       <div className="p-4 border-t border-neutral-200 dark:border-neutral-700">
-        <div className="mb-4">
-          <ThemeToggle />
-        </div>
-        
         <Button 
           variant="outline" 
           className="w-full p-3 flex items-center justify-center space-x-2"
