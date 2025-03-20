@@ -47,31 +47,27 @@ export interface IStorage {
   sessionStore: session.SessionStore;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private destinations: Map<number, Destination>;
-  private experiences: Map<number, Experience>;
-  private posts: Map<number, Post>;
-  private comments: Map<number, Comment>;
-  private bookings: Map<number, Booking>;
-  
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+
+export class PostgresStorage implements IStorage {
+  private pool: Pool;
+  private db: any;
   sessionStore: session.SessionStore;
-  
-  // ID counters
-  private userIdCounter: number;
-  private destinationIdCounter: number;
-  private experienceIdCounter: number;
-  private postIdCounter: number;
-  private commentIdCounter: number;
-  private bookingIdCounter: number;
 
   constructor() {
-    this.users = new Map();
-    this.destinations = new Map();
-    this.experiences = new Map();
-    this.posts = new Map();
-    this.comments = new Map();
-    this.bookings = new Map();
+    this.pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
+    
+    this.db = drizzle(this.pool);
+    
+    // Initialize session store with Postgres
+    const PostgresStore = require('connect-pg-simple')(session);
+    this.sessionStore = new PostgresStore({
+      pool: this.pool,
+      tableName: 'session'
+    });
     
     // Debug current database state
     console.log('Database initialized with:');
