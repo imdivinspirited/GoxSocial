@@ -1,0 +1,55 @@
+*"Create a high-performance, secure, and scalable tourism and social media website named TourviaHPT using Next.js for frontend, Node.js/Express for backend APIs, and PostgreSQL + MongoDB for database management. Use Tailwind CSS for a responsive, attractive UI with dark mode/light mode options. The website should feature advanced login/registration with Google, Facebook, and mobile OTP, ensuring secure login with 2-step verification and facial recognition. Implement social media features with post creation, stories, likes, comments, shares, and user interaction functionalities. Include a booking system for destinations, hotels, and activities with secure payment options (Stripe, Razorpay, etc.) and dynamic pricing. Implement AI-powered travel suggestions, live chat (24/7), and group collaboration for trip planning. Include a dashboard with analytics and allow premium users to add their hotels and services.
+
+Use dummy data initially for all functionalities and ensure all pages, features, and APIs work smoothly with no errors. Add a profile section where users can manage their accounts, update settings, and view activity logs. Implement explore, search, notifications, and a leaderboard with achievements. Ensure 50 additional powerful features such as AR-based travel previews, IoT travel device integration, smart payment system, and trend analytics. Also, provide a dedicated section for premium users with exclusive luxury travel packages, early access to deals, and VIP services. The website should have multilingual support, SEO optimization, mobile responsiveness, and real-time notifications that delete after 24 hours.
+
+Integrate APIs for live travel updates, weather forecasts, and emergency alerts. Add an affiliate marketing system with commission tracking and referral programs. Include secure transactions, encryption, and protection against unauthorized access and attacks. Optimize the website for high-speed performance and ensure smooth functioning under heavy traffic. Use modern technologies and efficient architecture to build a future-proof platform, with all features and functions fully operational. Use dummy items for all initial content to be replaced later."**
+
+⚡️ Additional Instructions for Cursor AI:
+✅ Backend APIs: Create RESTful APIs for user authentication, post management, hotel listings, and payment integration.
+✅ Database Configuration:
+
+Use PostgreSQL for structured data (user profiles, bookings, transactions).
+Use MongoDB for unstructured data (social media posts, comments, activity logs).
+✅ Security Measures: Implement JWT for secure authentication, bcrypt for password hashing, and ensure protection from CSRF, XSS, and SQL injection attacks.
+✅ AI Integration: Add AI-powered recommendations, chatbot for user queries, and predictive content for personalized experiences.
+✅ Payment System: Enable secure payment gateways with multiple payment options, dynamic pricing, and fraud prevention.
+
+📚 Key Pages to Include:
+✅ 1. Registration & Login Page
+✅ 2. Home Page (Social media, explore, featured destinations)
+✅ 3. Profile Page (User info, activity, settings)
+✅ 4. Booking Page (Hotel listings, secure payments)
+✅ 5. Explore/Discover Page (Filters for search results)
+✅ 6. Notification Center (Real-time, auto-delete after 24 hours)
+✅ 7. Social Feed Page (User posts, comments, likes)
+✅ 8. Developer Mode Page (Premium user hotel management)
+✅ 9. Premium Dashboard (Exclusive features and reports)
+✅ 10. Admin Dashboard (User, post, and content management)
+
+🚀 Important Features to Include:
+✅ Social media interactions (posts, likes, comments, shares)
+✅ AI-powered travel suggestions and smart itineraries
+✅ AR/VR travel preview and local guides
+✅ User reports, blocking, and safety measures
+✅ Multi-language support and fast loading speed
+✅ Real-time notifications, leaderboard, and travel challenges
+✅ Emergency support and crowd prediction
+✅ Smart payment and discount system
+✅ Referral and affiliate marketing programs
+✅ 24/7 live chat and customer support
+
+🛑 Security Requirements:
+✅ Secure login with 2-step verification and facial recognition
+✅ Prevent unauthorized access with token-based authentication
+✅ Encrypted data storage and secure payment processing
+✅ Protection against CSRF, XSS, and SQL injection
+
+🎨 UI/UX Design Considerations:
+✅ User-friendly interface with clear call-to-action buttons
+✅ Attractive, responsive design with dark/light mode
+✅ Smooth navigation across all devices
+
+🔥 Additional Considerations:
+Ensure scalability to handle high user traffic without crashes.
+Optimize all APIs and databases for high-speed performance.
+Implement analytics and SEO-friendly architecture.
