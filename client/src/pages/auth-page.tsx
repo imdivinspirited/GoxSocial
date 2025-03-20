@@ -107,14 +107,6 @@ export default function AuthPage() {
                 >
                   Continue with Google
                 </Button>
-                
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => window.location.href = '/auth/twitter'}
-                >
-                  Continue with Twitter
-                </Button>
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t" />

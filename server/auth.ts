@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as FacebookStrategy } from "passport-facebook";
-import { Strategy as TwitterStrategy } from "passport-twitter";
+//import { Strategy as TwitterStrategy } from "passport-twitter"; //Removed Twitter Strategy import
 import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
@@ -75,31 +75,6 @@ export function setupAuth(app: Express) {
     }
   }));
 
-  
-
-  // Twitter Strategy
-  passport.use(new TwitterStrategy({
-    consumerKey: process.env.TWITTER_API_KEY || '',
-    consumerSecret: process.env.TWITTER_API_SECRET || '',
-    callbackURL: "/auth/twitter/callback",
-    includeEmail: true
-  }, async (token, tokenSecret, profile, done) => {
-    try {
-      let user = await storage.getUserByUsername(profile.emails![0].value);
-      if (!user) {
-        user = await storage.createUser({
-          username: profile.emails![0].value,
-          email: profile.emails![0].value,
-          password: '',
-          fullName: profile.displayName,
-          profileImage: profile.photos?.[0].value
-        });
-      }
-      return done(null, user);
-    } catch (error) {
-      return done(error as Error);
-    }
-  }));
 
   passport.use(
     new LocalStrategy(async (username, password, done) => {
@@ -154,25 +129,25 @@ export function setupAuth(app: Express) {
 
   app.post("/api/login", (req, res, next) => {
     console.log("Login attempt:", { username: req.body.username });
-    
+
     passport.authenticate("local", async (err, user, info) => {
       if (err) {
         console.error("Login error:", err);
         return next(err);
       }
-      
+
       if (!user) {
         const dbUser = await storage.getUserByUsername(req.body.username);
         console.log("DB User found:", !!dbUser, "Password match failed");
         return res.status(401).json({ message: "Invalid credentials" });
       }
-      
+
       req.login(user, (err) => {
         if (err) {
           console.error("Session error:", err);
           return next(err);
         }
-        
+
         // Safely remove password from response
         const { password, ...safeUser } = user;
         console.log("Login successful for user:", safeUser.username);
@@ -188,14 +163,6 @@ export function setupAuth(app: Express) {
     failureRedirect: '/auth'
   }));
 
-  
-
-  // Twitter auth routes
-  app.get('/auth/twitter', passport.authenticate('twitter'));
-  app.get('/auth/twitter/callback', passport.authenticate('twitter', {
-    successRedirect: '/',
-    failureRedirect: '/auth'
-  }));
 
   app.post("/api/logout", (req, res, next) => {
     req.logout((err) => {
@@ -206,7 +173,7 @@ export function setupAuth(app: Express) {
 
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+
     // Safely remove password from response
     const { password, ...safeUser } = req.user as User;
     res.json(safeUser);
