@@ -32,7 +32,7 @@ import {
   Download,
   ScrollText,
   Phone,
-  Twitter
+  MessagesSquare
 } from "lucide-react";
 
 export default function SettingsPage() {
