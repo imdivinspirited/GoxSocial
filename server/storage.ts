@@ -98,9 +98,13 @@ export class MemStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
+    console.log("Searching for user:", username);
+    console.log("Current users:", Array.from(this.users.values()));
+    const user = Array.from(this.users.values()).find(
       (user) => user.username.toLowerCase() === username.toLowerCase()
     );
+    console.log("Found user:", user);
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -115,6 +119,7 @@ export class MemStorage implements IStorage {
       isPremium: false 
     };
     
+    console.log("Creating new user:", user);
     this.users.set(id, user);
     return user;
   }
