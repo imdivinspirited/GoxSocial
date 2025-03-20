@@ -8,7 +8,10 @@ import {
   User, 
   Bell, 
   LogOut,
-  Settings
+  Settings,
+  MessageSquare,
+  Bot,
+  ShoppingCart
 } from "lucide-react";
 
 export function Sidebar() {
@@ -94,6 +97,40 @@ export function Sidebar() {
         >
           <Settings className="w-5 h-5" />
           <span>Settings</span>
+        </a>
+        <a 
+          href="/chat" 
+          className={`flex items-center space-x-3 p-3 rounded-lg ${
+            isActive("/chat") 
+              ? "bg-primary text-white" 
+              : "hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+          }`}
+        >
+          <MessageSquare className="w-5 h-5" />
+          <span>Live Chat</span>
+        </a>
+        <a 
+          href="/ai-assistant" 
+          className={`flex items-center space-x-3 p-3 rounded-lg ${
+            isActive("/ai-assistant") 
+              ? "bg-primary text-white" 
+              : "hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+          }`}
+        >
+          <Bot className="w-5 h-5" />
+          <span>AI Assistant</span>
+        </a>
+        <a 
+          href="/cart" 
+          className={`flex items-center space-x-3 p-3 rounded-lg ${
+            isActive("/cart") 
+              ? "bg-primary text-white" 
+              : "hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+          } relative`}
+        >
+          <ShoppingCart className="w-5 h-5" />
+          <span>Cart</span>
+          <span className="absolute right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full">2</span>
         </a>
       </nav>
       

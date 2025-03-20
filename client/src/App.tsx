@@ -10,6 +10,9 @@ import ProfilePage from "@/pages/profile-page";
 import SettingsPage from "@/pages/settings-page";
 import BookingPage from "@/pages/booking-page";
 import NotificationsPage from "@/pages/notifications-page";
+import ChatPage from "@/pages/chat-page";
+import AIAssistantPage from "@/pages/ai-assistant-page";
+import CartPage from "@/pages/cart-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
 
@@ -23,6 +26,9 @@ function Router() {
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/bookings" component={BookingPage} />
       <ProtectedRoute path="/notifications" component={NotificationsPage} />
+      <ProtectedRoute path="/chat" component={ChatPage} />
+      <ProtectedRoute path="/ai-assistant" component={AIAssistantPage} />
+      <ProtectedRoute path="/cart" component={CartPage} />
       <Route component={NotFound} />
     </Switch>
   );
