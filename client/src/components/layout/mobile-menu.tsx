@@ -40,7 +40,10 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
       <div className="absolute left-0 top-0 bottom-0 w-4/5 max-w-sm bg-white dark:bg-neutral-800 shadow-xl flex flex-col transform transition-transform">
         <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center justify-between">
-            <a href="/" className="text-xl font-bold text-primary">TourviaHPT</a>
+            <a href="/" className="flex items-center space-x-2">
+              <img src="/images/gox-icon.svg" alt="GoX Social Logo" className="h-6 w-6" />
+              <span className="text-xl font-bold text-primary">GoX Social</span>
+            </a>
             <button 
               onClick={onClose}
               className="p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-700"
@@ -53,11 +56,11 @@ export function MobileMenu({ onClose }: MobileMenuProps) {
         <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
           <div className="flex items-center space-x-3">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={user?.profileImage} alt="User profile" />
-              <AvatarFallback>{user?.fullName.charAt(0)}</AvatarFallback>
+              <AvatarImage src={user?.profileImage === null ? undefined : user?.profileImage} alt="User profile" />
+              <AvatarFallback>{user?.fullName?.[0] || 'U'}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-medium">{user?.fullName}</p>
+              <p className="font-medium">{user?.fullName || 'User'}</p>
               <p className="text-sm text-neutral-500 dark:text-neutral-400">
                 {user?.isPremium ? "Premium Member" : "Regular Member"}
               </p>

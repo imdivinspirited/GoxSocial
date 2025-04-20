@@ -1,6 +1,6 @@
-# TourviaHPT - Tourism and Social Media Platform
+# GoX Social - Tourism and Social Media Platform
 
-TourviaHPT is a high-performance, secure, and scalable tourism and social media website that combines travel features with social networking capabilities. It allows users to explore destinations, share experiences, and book travel services.
+GoX Social is a high-performance, secure, and scalable tourism and social media website that combines travel features with social networking capabilities. It allows users to explore destinations, share experiences, and book travel services.
 
 ## Features
 
@@ -35,7 +35,7 @@ TourviaHPT is a high-performance, secure, and scalable tourism and social media 
 1. Clone the repository
    ```bash
    git clone <repository-url>
-   cd tourviaHPT
+   cd goxsocial
    ```
 
 2. Install dependencies

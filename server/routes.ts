@@ -15,6 +15,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
     res.json(safeUsers);
   });
+
+  // Debug endpoint to update a user
+  app.put("/api/debug/users/:id", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const userData = req.body;
+      
+      // Update the user
+      const updatedUser = await storage.updateUser(userId, userData);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Safely remove password from response
+      const { password, ...safeUser } = updatedUser;
+      res.status(200).json(safeUser);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  // Debug endpoint to create an admin user
+  app.post("/api/debug/create-admin", async (req, res) => {
+    try {
+      const { username, password, email, fullName, bio, profileImage } = req.body;
+      
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      
+      // Create user first
+      const user = await storage.createUser({
+        username,
+        password,
+        email,
+        fullName,
+        bio,
+        profileImage,
+      });
+      
+      // Then update to make admin
+      const adminUser = await storage.updateUser(user.id, {
+        isAdmin: true,
+        isPremium: true
+      });
+      
+      // Safely remove password from response
+      const { password: pwd, ...safeUser } = adminUser || user;
+      res.status(201).json(safeUser);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create admin user" });
+    }
+  });
+  
+  // Debug endpoint to create a test post
+  app.post("/api/debug/create-post", async (req, res) => {
+    try {
+      const { userId, content, images, isPublic } = req.body;
+      
+      // Create the post
+      const post = await storage.createPost({
+        userId,
+        content,
+        images: images || [],
+        isPublic: isPublic !== undefined ? isPublic : true
+      });
+      
+      res.status(201).json(post);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create test post" });
+    }
+  });
+
   // Set up authentication routes
   setupAuth(app);
 
@@ -116,6 +191,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/posts/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const post = await storage.getPost(id);
+
+      if (!post) {
+        return res.status(404).json({ message: "Post not found" });
+      }
+
+      res.json(post);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch post" });
+    }
+  });
+
   app.get("/api/posts/:id/comments", async (req, res) => {
     try {
       const postId = parseInt(req.params.id);
@@ -213,6 +303,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         bookings: Array.from(storage.bookings.values())
       };
       res.json(dbState);
+    });
+    
+    // Add promotional posts for testing
+    app.get('/api/debug/add-promo-posts', async (req, res) => {
+      try {
+        // Import the script dynamically
+        const { addPromotionalPosts } = require('./add_promo_posts');
+        await addPromotionalPosts();
+        res.json({ success: true, message: "Promotional posts added successfully" });
+      } catch (error) {
+        console.error("Failed to add promotional posts:", error);
+        res.status(500).json({ success: false, message: "Failed to add promotional posts" });
+      }
     });
   }
 

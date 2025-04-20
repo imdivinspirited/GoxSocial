@@ -38,7 +38,7 @@ async function comparePasswords(supplied: string, stored: string) {
 
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "tourviaHPT-session-secret",
+    secret: process.env.SESSION_SECRET || "goxsocial-session-secret",
     resave: false,
     saveUninitialized: false,
     store: storage.sessionStore,

@@ -1,7 +1,7 @@
 import { AppShell } from "@/components/layout/app-shell";
-import { FeaturedDestinations } from "@/components/home/featured-destinations";
 import { SocialFeed } from "@/components/home/social-feed";
-import { TrendingExperiences } from "@/components/home/trending-experiences";
+import { FilteredDestinations } from "@/components/home/filtered-destinations";
+import { FilteredExperiences } from "@/components/home/filtered-experiences";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,13 +82,13 @@ export default function HomePage() {
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 h-5 w-5" />
         </div>
         
-        <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex space-x-2 home-section-scroll pb-2">
           {filters.map(filter => (
             <Button
               key={filter.id}
               onClick={() => setActiveFilter(filter.id)}
               variant={activeFilter === filter.id ? "default" : "outline"}
-              className="rounded-full whitespace-nowrap text-sm"
+              className="rounded-full whitespace-nowrap text-sm flex-shrink-0"
             >
               {filter.name}
             </Button>
@@ -96,9 +96,13 @@ export default function HomePage() {
         </div>
       </div>
       
-      <FeaturedDestinations />
+      {/* Destinations based on the selected filter */}
+      <FilteredDestinations category={activeFilter} />
+      
       <SocialFeed />
-      <TrendingExperiences />
+      
+      {/* Experiences based on the selected filter */}
+      <FilteredExperiences category={activeFilter} />
     </AppShell>
   );
 }

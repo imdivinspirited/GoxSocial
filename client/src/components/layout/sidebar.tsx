@@ -27,7 +27,10 @@ export function Sidebar() {
   return (
     <aside className="hidden lg:flex lg:flex-col w-64 border-r border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 sticky top-0 h-screen">
       <div className="p-4 border-b border-neutral-200 dark:border-neutral-700">
-        <a href="/" className="text-2xl font-bold text-primary">TourviaHPT</a>
+        <a href="/" className="flex items-center space-x-3">
+          <img src="/images/gox-icon.svg" alt="GoX Social Logo" className="h-8 w-8" />
+          <span className="text-2xl font-bold text-primary">GoX Social</span>
+        </a>
       </div>
       
       <nav className="flex-1 p-4 space-y-1">
@@ -133,17 +136,6 @@ export function Sidebar() {
           <span className="absolute right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full">2</span>
         </a>
       </nav>
-      
-      <div className="p-4 border-t border-neutral-200 dark:border-neutral-700">
-        <Button 
-          variant="outline" 
-          className="w-full p-3 flex items-center justify-center space-x-2"
-          onClick={handleLogout}
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Logout</span>
-        </Button>
-      </div>
     </aside>
   );
 }

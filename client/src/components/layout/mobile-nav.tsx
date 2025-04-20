@@ -7,8 +7,8 @@ export function MobileNav() {
   const isActive = (path: string) => location === path;
   
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 z-30">
-      <div className="grid grid-cols-5 py-2">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 w-full bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700 z-30">
+      <div className="grid grid-cols-5 py-2 w-full">
         <a 
           href="/" 
           className={`flex flex-col items-center p-2 ${

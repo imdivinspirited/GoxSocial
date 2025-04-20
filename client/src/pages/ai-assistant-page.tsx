@@ -11,9 +11,9 @@ import { useToast } from "@/hooks/use-toast";
 // Pre-defined responses for different travel-related queries
 const AI_RESPONSES = {
   greetings: [
-    "Hello! I'm your TourviaHPT virtual assistant. How can I help with your travel plans today?",
+    "Hello! I'm your GoX Social virtual assistant. How can I help with your travel plans today?",
     "Hi there! I'm here to help make your travel experience amazing. What are you looking for?",
-    "Welcome to TourviaHPT! I'm your AI travel companion. How can I assist you today?"
+    "Welcome to GoX Social! I'm your AI travel companion. How can I assist you today?"
   ],
   destinations: [
     "Based on your interests in cultural experiences and nature, I'd recommend visiting Kyoto, Japan. The city offers a perfect blend of historic temples, beautiful gardens, and authentic cultural experiences.",
@@ -65,7 +65,7 @@ export default function AIAssistantPage() {
     {
       id: 1,
       sender: "ai",
-      text: "Hello! I'm your TourviaHPT virtual assistant. How can I help with your travel plans today?",
+      text: "Hello! I'm your GoX Social virtual assistant. How can I help with your travel plans today?",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -216,11 +216,14 @@ export default function AIAssistantPage() {
       <div className="container mx-auto p-4 h-[calc(100vh-4rem)] flex flex-col">
         <div className="flex items-center gap-3 mb-4">
           <Avatar className="h-10 w-10 bg-primary">
-            <Bot className="text-white h-6 w-6" />
+            <AvatarImage src="/images/gox-icon.svg" alt="GoX Social AI" />
+            <AvatarFallback>
+              <Bot className="text-white h-6 w-6" />
+            </AvatarFallback>
           </Avatar>
           <div>
             <h1 className="text-xl font-bold flex items-center gap-2">
-              TourviaHPT AI Assistant
+              GoX Social AI Assistant
               <Sparkles className="h-4 w-4 text-yellow-500" />
             </h1>
             <p className="text-sm text-neutral-500 dark:text-neutral-400">
@@ -238,6 +241,7 @@ export default function AIAssistantPage() {
             >
               {message.sender === "ai" && (
                 <Avatar className="h-8 w-8 mr-2">
+                  <AvatarImage src="/images/gox-icon.svg" alt="GoX Social AI" />
                   <AvatarFallback className="bg-primary">
                     <Bot className="text-white h-4 w-4" />
                   </AvatarFallback>
@@ -271,6 +275,7 @@ export default function AIAssistantPage() {
           {isTyping && (
             <div className="flex justify-start mb-4">
               <Avatar className="h-8 w-8 mr-2">
+                <AvatarImage src="/images/gox-icon.svg" alt="GoX Social AI" />
                 <AvatarFallback className="bg-primary">
                   <Bot className="text-white h-4 w-4" />
                 </AvatarFallback>

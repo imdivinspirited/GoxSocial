@@ -1,8 +1,9 @@
-import { users, destinations, experiences, posts, comments, bookings } from "@shared/schema";
+import { users, destinations, experiences, posts, comments, bookings, followers } from "@shared/schema";
 import { 
   User, InsertUser, Destination, InsertDestination, 
   Experience, InsertExperience, Post, InsertPost, 
-  Comment, InsertComment, Booking, InsertBooking
+  Comment, InsertComment, Booking, InsertBooking,
+  Follower, InsertFollower
 } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
@@ -16,6 +17,15 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, user: Partial<User>): Promise<User | undefined>;
+  
+  // Follower methods
+  followUser(follower: InsertFollower): Promise<Follower>;
+  unfollowUser(followerId: number, followingId: number): Promise<boolean>;
+  isFollowing(followerId: number, followingId: number): Promise<boolean>;
+  getFollowers(userId: number): Promise<User[]>; // Users who follow this user
+  getFollowing(userId: number): Promise<User[]>; // Users this user follows
+  getFollowerCount(userId: number): Promise<number>;
+  getFollowingCount(userId: number): Promise<number>;
   
   // Destination methods
   getDestinations(): Promise<Destination[]>;
@@ -47,38 +57,33 @@ export interface IStorage {
   sessionStore: session.SessionStore;
 }
 
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
+// Comment out PostgreSQL imports that are causing errors
+// import { drizzle } from 'drizzle-orm/node-postgres';
+// import { Pool } from 'pg';
 
-export class PostgresStorage implements IStorage {
-  private pool: Pool;
-  private db: any;
+// export class PostgresStorage implements IStorage {
+// ... existing code ...
+
+// Implement MemStorage class
+export class MemStorage implements IStorage {
+  public users = new Map<number, User>();
+  public destinations = new Map<number, Destination>();
+  public experiences = new Map<number, Experience>();
+  public posts = new Map<number, Post>();
+  public comments = new Map<number, Comment>();
+  public bookings = new Map<number, Booking>();
+  
+  private userIdCounter = 1;
+  private destinationIdCounter = 1;
+  private experienceIdCounter = 1;
+  private postIdCounter = 1;
+  private commentIdCounter = 1;
+  private bookingIdCounter = 1;
+  
   sessionStore: session.SessionStore;
-
+  
   constructor() {
-    this.pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-    });
-    
-    this.db = drizzle(this.pool);
-    
-    // Initialize session store with Postgres
-    const PostgresStore = require('connect-pg-simple')(session);
-    this.sessionStore = new PostgresStore({
-      pool: this.pool,
-      tableName: 'session'
-    });
-    
-    // Debug current database state
-    console.log('Database initialized with:');
-    console.log('Users:', Array.from(this.users.values()));
-    
-    this.userIdCounter = 1;
-    this.destinationIdCounter = 1;
-    this.experienceIdCounter = 1;
-    this.postIdCounter = 1;
-    this.commentIdCounter = 1;
-    this.bookingIdCounter = 1;
+    console.log('Using in-memory storage');
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000 // prune expired entries every 24h
@@ -266,6 +271,44 @@ export class PostgresStorage implements IStorage {
 
   // Seed data for testing
   private seedData() {
+    // Seed admin user
+    const adminUser = {
+      username: 'admin_kavinder',
+      password: '1cb2b98d49d0c91bceffe8a052c3d236318df7d6b7946b8ef27821f61f7c295a34db183d5529479637b7692af03f3e363369c37482a664bb2990beb214fffb89.bb75987574f42c31786306edf38495ab',
+      email: 'kavinder@goxsocial.com',
+      fullName: 'Kavinder Kumar',
+      bio: 'Admin of website',
+      profileImage: 'https://ui-avatars.com/api/?name=Kavinder+Kumar&background=random',
+      isAdmin: true,
+      isPremium: true
+    };
+    
+    this.createUser(adminUser).then(user => {
+      // Create posts for admin user
+      const adminPosts = [
+        {
+          userId: user.id,
+          content: 'Welcome to GoX Social! I am the admin here. Feel free to reach out to me for any questions or assistance.',
+          images: ['https://images.unsplash.com/photo-1562664377-709f2c337eb2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&h=300&q=80'],
+          isPublic: true
+        },
+        {
+          userId: user.id,
+          content: 'Explore our new premium membership features! Upgrade today for exclusive access to special destinations and travel deals.',
+          images: ['https://images.unsplash.com/photo-1594394489098-2e4f1cab8b55?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&h=300&q=80'],
+          isPublic: true
+        },
+        {
+          userId: user.id,
+          content: 'Looking for the best travel destinations this summer? Check out our curated list of beaches and resorts with amazing discounts!',
+          images: ['https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&h=300&q=80'],
+          isPublic: true
+        }
+      ];
+      
+      adminPosts.forEach(post => this.createPost(post));
+    });
+
     // Seed destinations
     const destinations: InsertDestination[] = [
       {

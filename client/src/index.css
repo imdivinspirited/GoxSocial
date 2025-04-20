@@ -26,3 +26,218 @@
     @apply text-[#0984E3] dark:text-[#0984E3];
   }
 }
+
+/* Custom utility to hide scrollbars but maintain scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
+/* Apply scrollbar hiding to all horizontal scrolling containers on the home page */
+.home-section-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.home-section-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Post card styling */
+.post-card {
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 0.75rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive post sizing for different screen sizes */
+@media (min-width: 768px) {
+  /* For medium screens, have a 2-column layout */
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+  }
+  
+  .profile-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .post-card {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* For large screens, limit the width of posts to prevent them from being too wide */
+  .post-card {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Limit the size of post images on larger screens */
+  .post-image-container {
+    max-height: 450px;
+    overflow: hidden;
+  }
+  
+  /* Adjust feed container width */
+  .feed-container {
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* Create a grid layout for posts on larger screens */
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+  }
+  
+  /* Adjust individual post cards in grid view */
+  .posts-grid .post-card {
+    margin-bottom: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Adjust post content to fill space */
+  .posts-grid .post-card .post-content {
+    flex-grow: 1;
+  }
+  
+  /* Adjust post images in grid view */
+  .posts-grid .post-image-container {
+    height: 300px;
+  }
+  
+  /* Adjust profile page posts grid */
+  .profile-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+}
+
+/* Larger screens - 5 posts per row */
+@media (min-width: 1536px) {
+  .profile-posts-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Make sure post content doesn't overflow */
+.post-content {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  margin-bottom: 1.5rem;
+}
+
+/* Limit post image height to maintain aspect ratio */
+.post-image {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+/* Add spacing between post sections */
+.post-card .flex {
+  margin-top: 1rem;
+}
+
+/* Instagram-like grid for profile posts */
+.instagram-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .instagram-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .instagram-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  .instagram-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Instagram-like post item */
+.instagram-post {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  position: relative;
+  border-radius: 0.25rem;
+  background-color: #f3f4f6;
+}
+
+.instagram-post img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.instagram-post:hover img {
+  transform: scale(1.05);
+}
+
+.instagram-post-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.instagram-post:hover .instagram-post-overlay {
+  opacity: 1;
+}
+
+.instagram-post-stats {
+  display: flex;
+  gap: 1rem;
+  color: white;
+  font-weight: 600;
+}
+
+.instagram-post-stats div {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}

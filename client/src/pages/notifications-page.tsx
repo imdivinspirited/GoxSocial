@@ -1,15 +1,16 @@
 import { AppShell } from "@/components/layout/app-shell";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Bell, Clock, UserPlus, Heart, MessageSquare, Tag, ThumbsUp, Users, ShoppingBag, Settings, Calendar, MapPin } from "lucide-react";
+import { Bell, Clock, UserPlus, Heart, MessageSquare, Tag, ThumbsUp, Users, ShoppingBag, Settings, Calendar, MapPin, RefreshCw } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 // Notification mock data for demonstration
 const notifications = [
@@ -68,7 +69,7 @@ const notifications = [
   {
     id: 5,
     type: "system",
-    text: "Welcome to TourviaHPT! Complete your profile to connect with travelers and find amazing destinations.",
+    text: "Welcome to GoX Social! Complete your profile to connect with travelers and find amazing destinations.",
     isRead: true,
     timestamp: new Date(Date.now() - 24 * 3600000) // 1 day ago
   },
@@ -91,6 +92,33 @@ const notifications = [
 export default function NotificationsPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { toast } = useToast();
+  
+  // Function to refresh notifications
+  const refreshNotifications = useCallback(() => {
+    setIsRefreshing(true);
+    setRefreshKey(prev => prev + 1);
+    
+    // Show loading toast
+    toast({
+      title: "Refreshing notifications",
+      description: "Getting your latest updates...",
+    });
+    
+    // Simulate API fetch delay
+    setTimeout(() => {
+      setIsRefreshing(false);
+      
+      // Success toast
+      toast({
+        title: "Notifications refreshed",
+        description: "Your notifications are now up to date",
+        variant: "default",
+      });
+    }, 1500);
+  }, [toast]);
   
   // Filter notifications based on active tab and read status
   const getFilteredNotifications = () => {
@@ -109,6 +137,9 @@ export default function NotificationsPage() {
     if (showUnreadOnly) {
       filtered = filtered.filter(n => !n.isRead);
     }
+    
+    // Sort by newest first
+    filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     
     return filtered;
   };
@@ -136,6 +167,16 @@ export default function NotificationsPage() {
     }
   };
 
+  // Mark all as read function
+  const markAllAsRead = () => {
+    // In a real app, this would update the server
+    toast({
+      title: "All notifications marked as read",
+      description: `${unreadCount} notifications have been marked as read`,
+      variant: "default",
+    });
+  };
+
   return (
     <AppShell>
       <div className="mb-6">
@@ -146,10 +187,21 @@ export default function NotificationsPage() {
               Stay updated with activity from your network
             </p>
           </div>
-          <Button variant="outline" className="flex items-center">
-            <Settings className="h-4 w-4 mr-2" />
-            <span>Settings</span>
-          </Button>
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              className="flex items-center"
+              onClick={refreshNotifications}
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>{isRefreshing ? "Refreshing..." : "Refresh"}</span>
+            </Button>
+            <Button variant="outline" className="flex items-center">
+              <Settings className="h-4 w-4 mr-2" />
+              <span>Settings</span>
+            </Button>
+          </div>
         </div>
       </div>
       
@@ -228,7 +280,12 @@ export default function NotificationsPage() {
                 
                 <Separator />
                 
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={markAllAsRead}
+                  disabled={unreadCount === 0}
+                >
                   Mark All as Read
                 </Button>
               </div>
@@ -260,11 +317,27 @@ export default function NotificationsPage() {
                 />
               </div>
               
-              {unreadCount > 0 && (
-                <Button variant="outline" size="sm">
-                  Mark All as Read
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={refreshNotifications}
+                  disabled={isRefreshing}
+                >
+                  <RefreshCw className={`h-3 w-3 mr-1.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  {isRefreshing ? "..." : "Refresh"}
                 </Button>
-              )}
+                
+                {unreadCount > 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={markAllAsRead}
+                  >
+                    Mark Read
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
           

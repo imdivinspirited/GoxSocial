@@ -85,7 +85,7 @@ export default function AuthPage() {
       <div className="w-full lg:w-1/2 p-8 md:p-12 flex items-center justify-center">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-primary">TourviaHPT</h1>
+            <h1 className="text-3xl font-bold text-primary">GoX Social</h1>
             <p className="mt-2 text-neutral-600 dark:text-neutral-400">
               Your journey to amazing destinations begins here
             </p>
@@ -261,7 +261,7 @@ export default function AuthPage() {
       <div className="hidden lg:block lg:w-1/2 bg-primary relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-primary-light/80"></div>
         <div className="relative h-full flex flex-col justify-center p-12 text-white">
-          <h2 className="text-4xl font-bold mb-6">Discover the World with TourviaHPT</h2>
+          <h2 className="text-4xl font-bold mb-6">Discover the World with GoX Social</h2>
           <ul className="space-y-4">
             <li className="flex items-start space-x-2">
               <span className="text-white bg-white/20 p-1 rounded-full">✓</span>
@@ -282,7 +282,7 @@ export default function AuthPage() {
           </ul>
           <div className="mt-8">
             <blockquote className="italic border-l-4 border-white/50 pl-4">
-              "TourviaHPT transformed how I travel. I've discovered amazing places I never knew existed!"
+              "GoX Social transformed how I travel. I've discovered amazing places I never knew existed!"
               <footer className="mt-2 font-medium">- Sarah Johnson, Travel Enthusiast</footer>
             </blockquote>
           </div>

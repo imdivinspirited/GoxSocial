@@ -11,6 +11,7 @@ export const users = pgTable("users", {
   fullName: text("full_name").notNull(),
   bio: text("bio"),
   profileImage: text("profile_image"),
+  coverImage: text("cover_image"),
   createdAt: timestamp("created_at").defaultNow(),
   isAdmin: boolean("is_admin").default(false),
   isPremium: boolean("is_premium").default(false),
@@ -121,6 +122,19 @@ export const insertBookingSchema = createInsertSchema(bookings).omit({
   createdAt: true,
 });
 
+// Followers schema - tracks user following relationships
+export const followers = pgTable("followers", {
+  id: serial("id").primaryKey(),
+  followerId: integer("follower_id").notNull(), // User who is following
+  followingId: integer("following_id").notNull(), // User being followed
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertFollowerSchema = createInsertSchema(followers).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Export types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -140,3 +154,6 @@ export type Comment = typeof comments.$inferSelect;
 
 export type InsertBooking = z.infer<typeof insertBookingSchema>;
 export type Booking = typeof bookings.$inferSelect;
+
+export type InsertFollower = z.infer<typeof insertFollowerSchema>;
+export type Follower = typeof followers.$inferSelect;

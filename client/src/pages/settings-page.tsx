@@ -6,9 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/use-auth";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { ImageCropModal } from "@/components/image-editor/ImageCropModal";
 import {
   Settings,
   User,
@@ -32,24 +35,26 @@ import {
   Download,
   ScrollText,
   Phone,
-  MessagesSquare
+  MessagesSquare,
+  CropIcon
 } from "lucide-react";
 
 export default function SettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isPremium, setIsPremium] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Initialize dark mode from localStorage on component mount
+  // Image crop state
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    setIsDarkMode(savedTheme === "dark" || (!savedTheme && prefersDark));
-    
-    // Mock check if user is premium (would be from API/database)
-    setIsPremium(user?.isPremium || false);
-  }, [user]);
+    // Check if dark mode is enabled
+    const isDark = document.documentElement.classList.contains('dark');
+    setIsDarkMode(isDark);
+  }, []);
 
   // Toggle dark mode
   const toggleTheme = () => {
@@ -72,7 +77,11 @@ export default function SettingsPage() {
     
     // Mock successful upgrade for demo
     setTimeout(() => {
-      setIsPremium(true);
+      // Update user's premium status through the mutation
+      updateProfileMutation.mutate({
+        isPremium: true
+      });
+      
       toast({
         title: "Upgrade successful!",
         description: "You are now a premium member. Enjoy all the benefits!",
@@ -80,10 +89,125 @@ export default function SettingsPage() {
     }, 2000);
   };
 
+  const updateProfileMutation = useMutation({
+    mutationFn: async (userData: Partial<typeof user>) => {
+      if (!user) throw new Error("No user logged in");
+      const res = await apiRequest("PUT", `/api/debug/users/${user.id}`, userData);
+      return res.json();
+    },
+    onSuccess: (updatedUser) => {
+      // Update the user in the cache
+      queryClient.setQueryData(["/api/user"], updatedUser);
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been successfully updated.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Update failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSaveSettings = () => {
-    toast({
-      title: "Settings saved",
-      description: "Your settings have been updated successfully.",
+    const fullName = (document.getElementById('fullName') as HTMLInputElement)?.value;
+    const username = (document.getElementById('username') as HTMLInputElement)?.value;
+    const email = (document.getElementById('email') as HTMLInputElement)?.value;
+    const bio = (document.getElementById('bio') as HTMLTextAreaElement)?.value;
+    
+    if (!fullName || !username || !email) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    updateProfileMutation.mutate({
+      fullName,
+      username,
+      email,
+      bio
+    });
+  };
+
+  // Handle avatar change
+  const handleAvatarChange = () => {
+    // Trigger file input click
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file (JPG, PNG, GIF).",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image under 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      // Convert file to base64 for preview
+      const base64 = await convertFileToBase64(file);
+      
+      // Open the crop modal with the selected image
+      setSelectedImage(base64);
+      setCropModalOpen(true);
+      
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: "Failed to prepare image for editing. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Error preparing avatar image:", error);
+    }
+  };
+  
+  // Handle crop completion
+  const handleCropComplete = (croppedImageUrl: string) => {
+    if (!croppedImageUrl) return;
+    
+    setIsUploading(true);
+    
+    // Update user profile with new avatar
+    updateProfileMutation.mutate({
+      profileImage: croppedImageUrl
+    });
+    
+    setCropModalOpen(false);
+    setSelectedImage(null);
+  };
+  
+  // Helper function to convert file to base64
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
     });
   };
 
@@ -144,14 +268,50 @@ export default function SettingsPage() {
             <h2 className="text-xl font-semibold mb-4">Account Information</h2>
             
             <div className="flex items-center space-x-4 mb-6">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={user?.profileImage || ""} alt={user?.fullName || ""} />
-                <AvatarFallback>{user?.fullName?.charAt(0) || "U"}</AvatarFallback>
-              </Avatar>
+              <div className="relative group">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage 
+                    src={user?.profileImage || ""} 
+                    alt={user?.fullName || ""} 
+                    className="object-cover"
+                  />
+                  <AvatarFallback>{user?.fullName?.charAt(0) || "U"}</AvatarFallback>
+                </Avatar>
+                
+                {user?.profileImage && (
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 rounded-full">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-6 w-6 bg-white/80 hover:bg-white text-neutral-800"
+                      onClick={() => {
+                        setSelectedImage(user.profileImage);
+                        setCropModalOpen(true);
+                      }}
+                    >
+                      <CropIcon className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+              </div>
               
               <div>
-                <Button size="sm" variant="outline">Change Avatar</Button>
-                <p className="text-xs text-neutral-500 mt-1">JPG, GIF or PNG. 1MB max size.</p>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={handleAvatarChange}
+                  disabled={isUploading}
+                >
+                  {isUploading ? "Uploading..." : "Change Avatar"}
+                </Button>
+                <input 
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                />
+                <p className="text-xs text-neutral-500 mt-1">JPG, GIF or PNG. 5MB max size.</p>
               </div>
             </div>
             
@@ -423,7 +583,7 @@ export default function SettingsPage() {
               <div className="pt-6 border-t border-neutral-200 dark:border-neutral-700 mt-6">
                 <h3 className="text-lg font-medium mb-3">Subscription</h3>
                 
-                {isPremium ? (
+                {user?.isPremium ? (
                   <div className="bg-neutral-50 dark:bg-neutral-700/30 p-4 rounded-lg border border-neutral-200 dark:border-neutral-700">
                     <div className="flex justify-between mb-2">
                       <p className="font-medium">Premium Plan</p>
@@ -453,7 +613,7 @@ export default function SettingsPage() {
           <TabsContent value="premium" className="bg-white dark:bg-neutral-800 rounded-xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold mb-2 flex items-center">
               Premium Membership
-              {isPremium && (
+              {user?.isPremium && (
                 <Badge className="ml-2 bg-gradient-to-r from-amber-500 to-amber-300 hover:from-amber-400 hover:to-amber-200 text-black">
                   Premium Member
                 </Badge>
@@ -464,14 +624,14 @@ export default function SettingsPage() {
               Unlock exclusive features and enhance your travel experience
             </p>
             
-            {isPremium ? (
+            {user?.isPremium ? (
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-lg border border-blue-100 dark:border-blue-800 mb-6">
                 <div className="flex items-center mb-4">
                   <Sparkles className="h-6 w-6 text-amber-500 mr-2" />
                   <h3 className="text-lg font-medium">You're a Premium Member!</h3>
                 </div>
                 <p className="text-neutral-600 dark:text-neutral-300 mb-4">
-                  Thanks for supporting TourviaHPT. You now have access to all premium features.
+                  Thanks for supporting GoX Social. You now have access to all premium features.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Button className="bg-gradient-to-r from-amber-500 to-amber-300 hover:from-amber-400 hover:to-amber-200 text-black">
@@ -567,7 +727,7 @@ export default function SettingsPage() {
                 <div>
                   <h4 className="font-medium">Ad-Free Experience</h4>
                   <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                    Enjoy TourviaHPT without any advertisements
+                    Enjoy GoX Social without any advertisements
                   </p>
                 </div>
               </div>
@@ -597,7 +757,7 @@ export default function SettingsPage() {
               </div>
             </div>
             
-            {!isPremium && (
+            {!user?.isPremium && (
               <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between bg-neutral-100 dark:bg-neutral-700/30 p-4 rounded-lg">
                 <div className="mb-4 sm:mb-0">
                   <h4 className="font-medium">Ready to enhance your experience?</h4>
@@ -864,7 +1024,7 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-neutral-50 dark:bg-neutral-700/30 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 text-center">
                     <MessageSquare className="h-5 w-5 mx-auto mb-2 text-neutral-500" />
-                    <p className="font-medium text-sm">support@tourviahpt.com</p>
+                    <p className="font-medium text-sm">support@goxsocial.com</p>
                   </div>
                   
                   <div className="bg-neutral-50 dark:bg-neutral-700/30 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 text-center">
@@ -874,7 +1034,7 @@ export default function SettingsPage() {
                   
                   <div className="bg-neutral-50 dark:bg-neutral-700/30 p-3 rounded-lg border border-neutral-200 dark:border-neutral-700 text-center">
                     <ArrowUpRight className="h-5 w-5 mx-auto mb-2 text-neutral-500" />
-                    <p className="font-medium text-sm">@TourviaHPT</p>
+                    <p className="font-medium text-sm">@GoXSocial</p>
                   </div>
                 </div>
               </div>
@@ -889,6 +1049,20 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+      
+      {/* Image Crop Modal */}
+      {cropModalOpen && selectedImage && (
+        <ImageCropModal
+          isOpen={cropModalOpen}
+          onClose={() => {
+            setCropModalOpen(false);
+            setSelectedImage(null);
+          }}
+          imageUrl={selectedImage}
+          onCropComplete={handleCropComplete}
+          isProfileImage={true}
+        />
+      )}
     </AppShell>
   );
 }
